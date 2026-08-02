@@ -1,0 +1,97 @@
+@import "tailwindcss";
+
+:root {
+  --ink-950: #0d0e10;
+  --ink-900: #131518;
+  --panel-800: #1b1e22;
+  --panel-700: #24272c;
+  --hairline: #33373d;
+  --paper: #ece7da;
+  --paper-dim: #d9d3c2;
+  --signal: #c97c2c;
+  --signal-soft: #e0995233;
+  --wire-teal: #4d8b81;
+  --ink-text: #eceae4;
+  --muted: #92979f;
+  --danger: #c85c4a;
+}
+
+@theme inline {
+  --color-ink-950: var(--ink-950);
+  --color-ink-900: var(--ink-900);
+  --color-panel-800: var(--panel-800);
+  --color-panel-700: var(--panel-700);
+  --color-hairline: var(--hairline);
+  --color-paper: var(--paper);
+  --color-paper-dim: var(--paper-dim);
+  --color-signal: var(--signal);
+  --color-signal-soft: var(--signal-soft);
+  --color-wire-teal: var(--wire-teal);
+  --color-ink-text: var(--ink-text);
+  --color-muted: var(--muted);
+  --color-danger: var(--danger);
+  --font-display: var(--font-fraunces);
+  --font-body: var(--font-inter);
+  --font-data: var(--font-plex-mono);
+}
+
+* {
+  border-color: var(--hairline);
+}
+
+body {
+  background: var(--ink-950);
+  color: var(--ink-text);
+  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+}
+
+::selection {
+  background: var(--signal-soft);
+  color: var(--ink-text);
+}
+
+/* thin, quiet scrollbars that fit the console feel */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--hairline) transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--hairline);
+  border-radius: 4px;
+}
+
+@keyframes stamp-in {
+  0% {
+    opacity: 0;
+    transform: scale(1.6) rotate(-14deg);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(0.94) rotate(-8deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(-8deg);
+  }
+}
+.stamp-enter {
+  animation: stamp-in 420ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stamp-enter {
+    animation: none;
+  }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 1; }
+}
+.pulse-dot {
+  animation: pulse-dot 1.3s ease-in-out infinite;
+}
