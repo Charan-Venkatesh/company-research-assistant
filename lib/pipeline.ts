@@ -5,8 +5,8 @@ import {
   hostnameOf,
 } from "./serper";
 import { crawlWebsite } from "./crawler";
-import { analyzeCompany, identifyCompetitors } from "./openrouter";
-import type { ResearchResult } from "./types";
+import { analyzeCompany, identifyCompetitors } from "./aiProvider";
+import type { ResearchResult, AiProvider } from "./types";
 
 const URL_PATTERN = /^https?:\/\//i;
 
@@ -32,6 +32,7 @@ export interface PipelineCallbacks {
 export async function runResearchPipeline(
   rawInput: string,
   model: string,
+  provider: AiProvider = "openrouter",
   callbacks: PipelineCallbacks = {}
 ): Promise<ResearchResult> {
   const { onProgress } = callbacks;
@@ -102,7 +103,8 @@ export async function runResearchPipeline(
     companyName,
     crawledText || "No crawlable content found on the website.",
     supportingFacts,
-    model
+    model,
+    provider
   );
   emit("analyze", "done");
 
@@ -127,7 +129,8 @@ export async function runResearchPipeline(
         analysis.industry,
         analysis.country,
         competitorSnippets,
-        model
+        model,
+        provider
       ).catch(() => [])
     : [];
   emit("competitors", "done", `${competitors.length} competitors found`);
@@ -153,6 +156,7 @@ export async function runResearchPipeline(
     sourcesUsed: [...new Set(sourcesUsed)],
     crawledPages: crawl.pages.map((p) => p.url),
     model,
+    provider,
     generatedAt: new Date().toISOString(),
   };
 }

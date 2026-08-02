@@ -1,54 +1,88 @@
-import { OPENROUTER_DEFAULT_MODELS } from "./types";
+import { OPENROUTER_DEFAULT_MODELS, AiProvider } from "./types";
 
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
+const NVIDIA_URL = "https://integrate.api.nvidia.com/v1/chat/completions";
 
 interface ChatMessage {
   role: "system" | "user" | "assistant";
   content: string;
 }
 
-async function callOpenRouter(
+interface ChatPayload {
+  model: string;
+  messages: ChatMessage[];
+  temperature: number;
+  response_format?: { type: "json_object" };
+}
+
+async function callAi(
+  provider: AiProvider,
   model: string,
   messages: ChatMessage[],
   jsonMode = true
 ): Promise<string> {
-  const apiKey = process.env.OPENROUTER_API_KEY;
-  if (!apiKey) {
-    throw new Error(
-      "OPENROUTER_API_KEY is not set. Add it to your environment variables."
-    );
+  let apiUrl = OPENROUTER_URL;
+  let apiKey = process.env.OPENROUTER_API_KEY;
+
+  if (provider === "nvidia") {
+    apiUrl = NVIDIA_URL;
+    apiKey = process.env.NVIDIA_API_KEY;
+    if (!apiKey) {
+      throw new Error(
+        "NVIDIA_API_KEY is not set. Add it to your environment variables."
+      );
+    }
+  } else {
+    if (!apiKey) {
+      throw new Error(
+        "OPENROUTER_API_KEY is not set. Add it to your environment variables."
+      );
+    }
   }
 
-  const res = await fetch(OPENROUTER_URL, {
+  const headers: Record<string, string> = {
+    Authorization: `Bearer ${apiKey}`,
+    "Content-Type": "application/json",
+  };
+
+  if (provider === "openrouter") {
+    headers["HTTP-Referer"] = process.env.APP_URL || "http://localhost:3000";
+    headers["X-Title"] = "Company Research Assistant";
+  }
+
+  const payload: ChatPayload = {
+    model,
+    messages,
+    temperature: 0.3,
+  };
+
+  if (jsonMode) {
+    payload.response_format = { type: "json_object" };
+  }
+
+  if (provider === "nvidia" && model.includes("deepseek")) {
+    delete payload.response_format;
+  }
+
+  const res = await fetch(apiUrl, {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-      "HTTP-Referer": process.env.APP_URL || "http://localhost:3000",
-      "X-Title": "Company Research Assistant",
-    },
-    body: JSON.stringify({
-      model,
-      messages,
-      temperature: 0.3,
-      ...(jsonMode ? { response_format: { type: "json_object" } } : {}),
-    }),
+    headers,
+    body: JSON.stringify(payload),
   });
 
   if (!res.ok) {
     const body = await res.text().catch(() => "");
-    throw new Error(`OpenRouter request failed (${res.status}): ${body}`);
+    throw new Error(`${provider} request failed (${res.status}): ${body}`);
   }
 
   const data = await res.json();
   const content = data?.choices?.[0]?.message?.content;
-  if (!content) throw new Error("OpenRouter returned an empty response.");
+  if (!content) throw new Error(`${provider} returned an empty response.`);
   return content;
 }
 
 function safeJsonParse<T>(raw: string, fallback: T): T {
   try {
-    // Strip markdown code fences if the model added them despite instructions.
     const cleaned = raw.replace(/^```json\s*|```$/g, "").trim();
     return JSON.parse(cleaned) as T;
   } catch {
@@ -69,7 +103,8 @@ export async function analyzeCompany(
   companyName: string,
   crawledText: string,
   supportingFacts: string,
-  model: string
+  model: string,
+  provider: AiProvider = "openrouter"
 ): Promise<AiCompanyAnalysis> {
   const system = `You are a B2B research analyst. You read raw website text and public search
 snippets, then produce a strictly factual, structured company profile.
@@ -93,7 +128,7 @@ ${crawledText}
 === Supporting public search snippets ===
 ${supportingFacts}`;
 
-  const raw = await callOpenRouter(model, [
+  const raw = await callAi(provider, model, [
     { role: "system", content: system },
     { role: "user", content: user },
   ]);
@@ -119,7 +154,8 @@ export async function identifyCompetitors(
   industry: string,
   country: string,
   searchSnippets: string,
-  model: string
+  model: string,
+  provider: AiProvider = "openrouter"
 ): Promise<AiCompetitor[]> {
   const system = `You are a market research analyst. Given raw search snippets about a company's
 market, identify real, named competitor companies operating in the same country and industry
@@ -135,7 +171,7 @@ Country: ${country}
 === Raw search snippets ===
 ${searchSnippets}`;
 
-  const raw = await callOpenRouter(model, [
+  const raw = await callAi(provider, model, [
     { role: "system", content: system },
     { role: "user", content: user },
   ]);

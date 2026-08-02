@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { listOpenRouterModels } from "@/lib/openrouter";
+import { listOpenRouterModels } from "@/lib/aiProvider";
 
 export const runtime = "nodejs";
 export const revalidate = 3600;

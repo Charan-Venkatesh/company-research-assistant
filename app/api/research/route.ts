@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { runResearchPipeline } from "@/lib/pipeline";
+import { AiProvider } from "@/lib/types";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -9,12 +10,23 @@ function sse(event: string, data: unknown): string {
 }
 
 export async function POST(req: NextRequest) {
-  const { input, model } = await req.json();
+  const { input, model, provider: rawProvider } = await req.json();
 
   if (!input || typeof input !== "string") {
     return new Response(JSON.stringify({ error: "Missing input" }), {
       status: 400,
     });
+  }
+
+  const provider: AiProvider = rawProvider === "nvidia" ? "nvidia" : "openrouter";
+
+  let selectedModel = model;
+  if (!selectedModel) {
+    if (provider === "nvidia") {
+      selectedModel = "deepseek-ai/deepseek-v4-pro";
+    } else {
+      selectedModel = "openai/gpt-4o-mini";
+    }
   }
 
   const encoder = new TextEncoder();
@@ -26,7 +38,8 @@ export async function POST(req: NextRequest) {
       try {
         const result = await runResearchPipeline(
           input,
-          model || "openai/gpt-4o-mini",
+          selectedModel,
+          provider,
           {
             onProgress: (step, status, detail) =>
               send("progress", { step, status, detail }),
