@@ -1,48 +1,47 @@
-import { OPENROUTER_DEFAULT_MODELS } from "./types";
+import { NVIDIA_DEFAULT_MODELS } from "./types";
 
-const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
+const NVIDIA_URL = "https://integrate.api.nvidia.com/v1/chat/completions";
 
 interface ChatMessage {
   role: "system" | "user" | "assistant";
   content: string;
 }
 
-async function callOpenRouter(
+async function callNvidia(
   model: string,
   messages: ChatMessage[],
   jsonMode = true
 ): Promise<string> {
-  const apiKey = process.env.OPENROUTER_API_KEY;
+  const apiKey = process.env.NVIDIA_API_KEY;
   if (!apiKey) {
     throw new Error(
-      "OPENROUTER_API_KEY is not set. Add it to your environment variables."
+      "NVIDIA_API_KEY is not set. Add it to your environment variables."
     );
   }
 
-  const res = await fetch(OPENROUTER_URL, {
+  const res = await fetch(NVIDIA_URL, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",
-      "HTTP-Referer": process.env.APP_URL || "http://localhost:3000",
-      "X-Title": "Company Research Assistant",
     },
     body: JSON.stringify({
       model,
       messages,
       temperature: 0.3,
       ...(jsonMode ? { response_format: { type: "json_object" } } : {}),
+      chat_template_kwargs: { thinking: false }
     }),
   });
 
   if (!res.ok) {
     const body = await res.text().catch(() => "");
-    throw new Error(`OpenRouter request failed (${res.status}): ${body}`);
+    throw new Error(`NVIDIA request failed (${res.status}): ${body}`);
   }
 
   const data = await res.json();
   const content = data?.choices?.[0]?.message?.content;
-  if (!content) throw new Error("OpenRouter returned an empty response.");
+  if (!content) throw new Error("NVIDIA returned an empty response.");
   return content;
 }
 
@@ -93,7 +92,7 @@ ${crawledText}
 === Supporting public search snippets ===
 ${supportingFacts}`;
 
-  const raw = await callOpenRouter(model, [
+  const raw = await callNvidia(model, [
     { role: "system", content: system },
     { role: "user", content: user },
   ]);
@@ -135,7 +134,7 @@ Country: ${country}
 === Raw search snippets ===
 ${searchSnippets}`;
 
-  const raw = await callOpenRouter(model, [
+  const raw = await callNvidia(model, [
     { role: "system", content: system },
     { role: "user", content: user },
   ]);
@@ -146,23 +145,23 @@ ${searchSnippets}`;
   return parsed.competitors ?? [];
 }
 
-/** Fetch the live OpenRouter model catalog, falling back to a curated list. */
-export async function listOpenRouterModels(): Promise<string[]> {
-  const apiKey = process.env.OPENROUTER_API_KEY;
-  if (!apiKey) return [...OPENROUTER_DEFAULT_MODELS];
+/** Fetch the live NVIDIA model catalog, falling back to a curated list. */
+export async function listNvidiaModels(): Promise<string[]> {
+  const apiKey = process.env.NVIDIA_API_KEY;
+  if (!apiKey) return [...NVIDIA_DEFAULT_MODELS];
 
   try {
-    const res = await fetch("https://openrouter.ai/api/v1/models", {
+    const res = await fetch("https://integrate.api.nvidia.com/v1/models", {
       headers: { Authorization: `Bearer ${apiKey}` },
       next: { revalidate: 3600 },
     });
-    if (!res.ok) return [...OPENROUTER_DEFAULT_MODELS];
+    if (!res.ok) return [...NVIDIA_DEFAULT_MODELS];
     const data = await res.json();
     const ids: string[] = (data?.data ?? [])
       .map((m: { id: string }) => m.id)
       .filter(Boolean);
-    return ids.length ? ids : [...OPENROUTER_DEFAULT_MODELS];
+    return ids.length ? ids : [...NVIDIA_DEFAULT_MODELS];
   } catch {
-    return [...OPENROUTER_DEFAULT_MODELS];
+    return [...NVIDIA_DEFAULT_MODELS];
   }
 }

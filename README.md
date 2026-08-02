@@ -23,12 +23,12 @@ User input (name or URL)
         │     skips logins/carts/duplicates/off-domain links, extracts
         │     visible text with Cheerio
         ▼
- 3. Analyze  ──  OpenRouter (user-selected model) turns crawled text +
+ 3. Analyze  ──  NVIDIA NIM (user-selected model) turns crawled text +
         │        search snippets into a structured JSON profile: summary,
         │        products/services, AI-generated pain points, industry
         ▼
  4. Competitors ── Serper.dev searches "<company> competitors <industry>",
-        │          OpenRouter turns the raw snippets into a clean,
+        │          NVIDIA NIM turns the raw snippets into a clean,
         │          deduplicated shortlist with name/website/reason
         ▼
  5. Report  ──  Streamed back to the UI over Server-Sent Events (live
@@ -51,7 +51,7 @@ the browser's `localStorage` only.
 - **pdfkit** — server-side PDF generation, streamed back as a download.
 - **Serper.dev** — search integration (official site resolution, company
   facts, competitor discovery).
-- **OpenRouter** — AI analysis, with a live model-selection dropdown.
+- **NVIDIA NIM** — AI analysis, with a live model-selection dropdown.
 - **Discord REST API** — bonus integration, posts the PDF + applicant/company
   details to a channel via bot token.
 
@@ -68,8 +68,8 @@ npm run dev                  # http://localhost:3000
 | Variable             | Required | Description                                                                 |
 |-----------------------|:--------:|-------------------------------------------------------------------------------|
 | `SERPER_API_KEY`      | Yes      | From [serper.dev](https://serper.dev). Used for search/resolution/competitors. |
-| `OPENROUTER_API_KEY`  | Yes      | From [openrouter.ai/keys](https://openrouter.ai/keys). Used for all AI calls. |
-| `APP_URL`              | No       | Public URL of your deployment, sent as `HTTP-Referer` to OpenRouter.         |
+| `NVIDIA_API_KEY`  | Yes      | From [build.nvidia.com](https://build.nvidia.com). Used for all AI calls. |
+| `APP_URL`              | No       | Public URL of your deployment, sent as `HTTP-Referer` to NVIDIA NIM.         |
 
 Discord Bot Token and Channel ID are **not** environment variables — they're
 entered per-user on the `/settings` page and stored in `localStorage`, since
@@ -80,7 +80,7 @@ brief rules out a database.
 
 1. Push this repo to GitHub.
 2. Import it in Vercel → it auto-detects Next.js.
-3. Add `SERPER_API_KEY` and `OPENROUTER_API_KEY` under Project → Settings →
+3. Add `SERPER_API_KEY` and `NVIDIA_API_KEY` under Project → Settings →
    Environment Variables.
 4. Deploy. That's it — API routes, crawler, and PDF generation all run as
    Vercel serverless functions (`runtime = "nodejs"` is set explicitly on
@@ -99,7 +99,7 @@ app/
   api/research/route.ts     orchestrates the pipeline, streams progress (SSE)
   api/pdf/route.ts          generates and returns the PDF report
   api/discord/route.ts      posts the report to a Discord channel (bonus)
-  api/models/route.ts       live OpenRouter model list for the dropdown
+  api/models/route.ts       live NVIDIA NIM model list for the dropdown
 lib/
   serper.ts                 Serper.dev search integration
   crawler.ts                 website crawler (page discovery + extraction)
@@ -144,7 +144,7 @@ numbers, model IDs) to visually separate facts from prose.
 
 ## FAQ (from the brief)
 
-- **Any AI model?** Yes — the dropdown is populated live from OpenRouter's
+- **Any AI model?** Yes — the dropdown is populated live from NVIDIA NIM's
   `/models` endpoint, with a small curated fallback list if that call fails.
 - **Any framework/language?** This submission uses Next.js/TypeScript.
 - **Database?** None used; no persistent storage anywhere.

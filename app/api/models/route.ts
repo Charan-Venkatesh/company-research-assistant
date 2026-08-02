@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { listOpenRouterModels } from "@/lib/openrouter";
+import { listNvidiaModels } from "@/lib/nvidia";
 
 export const runtime = "nodejs";
 export const revalidate = 3600;
 
 export async function GET() {
-  const models = await listOpenRouterModels();
+  const models = await listNvidiaModels();
   return NextResponse.json({ models });
 }

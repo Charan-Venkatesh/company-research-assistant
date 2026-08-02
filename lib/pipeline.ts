@@ -5,7 +5,7 @@ import {
   hostnameOf,
 } from "./serper";
 import { crawlWebsite } from "./crawler";
-import { analyzeCompany, identifyCompetitors } from "./openrouter";
+import { analyzeCompany, identifyCompetitors } from "./nvidia";
 import type { ResearchResult } from "./types";
 
 const URL_PATTERN = /^https?:\/\//i;

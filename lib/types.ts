@@ -53,10 +53,6 @@ export interface ApplicantInfo {
   email: string;
 }
 
-export const OPENROUTER_DEFAULT_MODELS = [
-  "openai/gpt-4o-mini",
-  "anthropic/claude-3.5-sonnet",
-  "google/gemini-2.0-flash-001",
-  "meta-llama/llama-3.3-70b-instruct",
-  "deepseek/deepseek-chat",
+export const NVIDIA_DEFAULT_MODELS = [
+  "deepseek-ai/deepseek-v4-pro",
 ] as const;

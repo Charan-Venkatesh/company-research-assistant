@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { ChevronDown } from "lucide-react";
-import { OPENROUTER_DEFAULT_MODELS } from "@/lib/types";
+import { NVIDIA_DEFAULT_MODELS } from "@/lib/types";
 
 export default function ModelSelect({
   value,
@@ -13,7 +13,7 @@ export default function ModelSelect({
   onChange: (model: string) => void;
   disabled?: boolean;
 }) {
-  const [models, setModels] = useState<string[]>([...OPENROUTER_DEFAULT_MODELS]);
+  const [models, setModels] = useState<string[]>([...NVIDIA_DEFAULT_MODELS]);
 
   useEffect(() => {
     let cancelled = false;
