@@ -188,6 +188,7 @@ export default function ResearchConsole() {
       <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-ink-950 via-ink-950 to-transparent flex flex-col items-center">
         <div className="w-full max-w-3xl relative">
           <input
+            aria-label="Company name or website URL"
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
