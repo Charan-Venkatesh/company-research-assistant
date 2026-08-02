@@ -71,6 +71,10 @@ const BLOCKED_DOMAINS = [
   "reddit.com",
 ];
 
+const BLOCKED_DOMAINS_REGEX = new RegExp(
+  BLOCKED_DOMAINS.map((b) => b.replace(/\./g, "\\.")).join("|")
+);
+
 function hostnameOf(url: string): string {
   try {
     return new URL(url).hostname.replace(/^www\./, "");
@@ -91,7 +95,7 @@ export async function findOfficialWebsite(
 
   const candidate = (data.organic ?? []).find((r) => {
     const host = hostnameOf(r.link);
-    return host && !BLOCKED_DOMAINS.some((b) => host.includes(b));
+    return host && !BLOCKED_DOMAINS_REGEX.test(host);
   });
 
   if (candidate) {
