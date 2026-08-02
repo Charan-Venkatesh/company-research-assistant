@@ -64,7 +64,8 @@ export async function sendReportToDiscord(
 
   if (!res.ok) {
     const body = await res.text().catch(() => "");
-    return { ok: false, error: `Discord API error (${res.status}): ${body}` };
+    console.error(`Discord API error (${res.status}): ${body}`);
+    return { ok: false, error: `Discord API error (${res.status})` };
   }
 
   return { ok: true };
