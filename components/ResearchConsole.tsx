@@ -5,7 +5,7 @@ import { ArrowUp, FileSearch, Loader2, ChevronDown } from "lucide-react";
 import ModelSelect from "./ModelSelect";
 import ProgressLog, { type ProgressItem } from "./ProgressLog";
 import Dossier from "./Dossier";
-import type { ResearchResult, ProviderType } from "@/lib/types";
+import type { ResearchResult, AiProvider } from "@/lib/types";
 
 interface LogEntry {
   id: string;
@@ -21,7 +21,7 @@ function initialProgress(): ProgressItem[] {
 
 export default function ResearchConsole() {
   const [input, setInput] = useState("");
-  const [provider, setProvider] = useState<ProviderType>("openrouter");
+  const [provider, setProvider] = useState<AiProvider>("openrouter");
   const [model, setModel] = useState("openai/gpt-4o-mini");
   const [entries, setEntries] = useState<LogEntry[]>([]);
   const [progress, setProgress] = useState<ProgressItem[]>([]);
@@ -132,7 +132,7 @@ export default function ResearchConsole() {
               <select
                 value={provider}
                 disabled={loading}
-                onChange={(e) => setProvider(e.target.value as ProviderType)}
+                onChange={(e) => setProvider(e.target.value as AiProvider)}
                 className="w-full appearance-none rounded-md border border-hairline bg-panel-700 py-2 pl-3 pr-8 font-data text-[12px] text-ink-text outline-none transition-colors focus:border-signal disabled:opacity-50"
               >
                 <option value="openrouter">OpenRouter</option>

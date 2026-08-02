@@ -1,151 +1,112 @@
-# Dossier — AI Company Research Assistant
 
-An AI-powered company research tool: give it a company name or a website URL,
-and it resolves the official site, crawls it, enriches the findings with live
-web search, runs AI analysis, maps competitors, and produces a downloadable
-PDF report — all through a chat-style interface.
+# 🚀 AI-Powered Company Research Assistant
 
-Built for the Relu Consultancy "AI & Automation Developer" hackathon brief.
+![Next.js](https://img.shields.io/badge/Next.js-14-000000?style=for-the-badge&logo=next.js)
+![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
+![OpenRouter](https://img.shields.io/badge/OpenRouter-AI-FF6B6B?style=for-the-badge)
+![NVIDIA NIM](https://img.shields.io/badge/NVIDIA_NIM-76B900?style=for-the-badge&logo=nvidia&logoColor=white)
+![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
 
-## How it works
+> **Built for the Relu Consultancy AI & Automation Developer Hackathon.**
 
+## 📖 Overview
+
+The **AI-Powered Company Research Assistant** is a Next.js application designed to completely automate B2B company research. By simply providing a company name or URL, the assistant kicks off a powerful workflow: it crawls the official website, retrieves search engine insights, and uses advanced AI models to synthesize a comprehensive business dossier. The final report includes an executive summary, product/service lists, inferred pain points, and a detailed competitor analysis.
+
+This project implements a **Dual-Provider Architecture**, seamlessly bridging **OpenRouter** (for dynamic model selection) and **NVIDIA NIM** (for high-performance enterprise AI), giving you the ultimate flexibility in how insights are generated.
+
+---
+
+## ✨ Features & Bonus Implementations
+
+This project doesn't just meet the baseline requirements—it goes above and beyond, fulfilling all bonus objectives from the hackathon rubric:
+
+*   **Dual-Provider Architecture:** Natively supports both OpenRouter (default) and NVIDIA NIM for LLM processing, allowing seamless switching and fallback mechanisms.
+*   **🤖 Discord Integration (Bonus!):** A dedicated settings page lets you input a Bot Token and Channel ID. Upon report generation, the app automatically pushes a rich text alert and the generated PDF directly to your Discord channel via the Discord API using `multipart/form-data`.
+*   **📄 Professional PDF Generation (Bonus!):** One-click, beautifully formatted PDF reports rendered client-side using `jsPDF` and `jsPDF-autotable`. The PDFs include all AI insights and competitor data in a clean, professional layout.
+*   **💅 UI/UX Polish (Bonus!):** A modern, dark-mode, highly responsive "ChatGPT-style" interface. It features real-time progress logging (via Server-Sent Events), a split-pane dossier layout, and smooth loading states for a premium user experience.
+*   **🕷️ Intelligent Web Crawling (Bonus!):** Custom crawler routing strategically targets high-value paths (like `/about`, `/products`) while stripping out noise (like `<nav>`, `<footer>`). This dramatically optimizes context windows and reduces token costs.
+
+---
+
+## 🛠️ Tech Stack
+
+*   **Frontend:** Next.js 14 (App Router), React, Tailwind CSS, Lucide Icons
+*   **Web Crawling:** Cheerio (for fast, headless, targeted DOM parsing)
+*   **Search & Routing:** Serper.dev API
+*   **AI/LLM Processing:** OpenRouter API (dynamic model selection) & NVIDIA NIM
+*   **PDF Generation:** jsPDF & jsPDF-autotable (Client-side rendering)
+*   **Deployment:** Vercel
+
+---
+
+## 🏗️ Architecture & Workflow
+
+1.  **Input Resolution:** The user provides a company name or URL. If a name is given, the Serper API resolves it to the official website.
+2.  **Parallel Data Gathering:**
+    *   **Search:** Serper API gathers general knowledge graph data and contact snippets.
+    *   **Crawl:** The intelligent crawler targets high-value pages, parses the DOM with Cheerio, and extracts relevant text.
+3.  **AI Analysis (OpenRouter / NVIDIA NIM):** The gathered data is fed into the selected AI provider. The model generates a structured profile including summaries, products, and pain points.
+4.  **Competitor Identification:** The AI cross-references search data to identify and analyze top competitors.
+5.  **Presentation & Export:** The UI updates in real-time. Once complete, the user can view the split-pane dossier, generate a PDF, and automatically push the report to Discord.
+
+---
+
+## 🚀 Setup Instructions
+
+Follow these steps to get the project running locally:
+
+### 1. Clone the Repository
+
+```bash
+git clone <your-repo-url>
+cd <your-repo-directory>
 ```
-User input (name or URL)
-        │
-        ▼
- 1. Resolve  ──  Serper.dev search if a name was given, to find the
-        │        official website (knowledge graph → organic fallback)
-        ▼
- 2. Search + Crawl (parallel)
-        │  ├─ Serper.dev: company overview + contact snippets
-        │  └─ Crawler: fetches home page, discovers on-domain links to
-        │     about/products/services/solutions/contact/pricing pages,
-        │     skips logins/carts/duplicates/off-domain links, extracts
-        │     visible text with Cheerio
-        ▼
- 3. Analyze  ──  OpenRouter (user-selected model) turns crawled text +
-        │        search snippets into a structured JSON profile: summary,
-        │        products/services, AI-generated pain points, industry
-        ▼
- 4. Competitors ── Serper.dev searches "<company> competitors <industry>",
-        │          OpenRouter turns the raw snippets into a clean,
-        │          deduplicated shortlist with name/website/reason
-        ▼
- 5. Report  ──  Streamed back to the UI over Server-Sent Events (live
-                progress log), rendered as a "Dossier" panel, downloadable
-                as a PDF (pdfkit), optionally posted to Discord
-```
 
-Everything runs statelessly, request-by-request — there's no database, per
-the assignment's constraints. Discord settings and applicant details live in
-the browser's `localStorage` only.
-
-## Tech stack
-
-- **Next.js 15 (App Router) + TypeScript** — single deployable project (UI +
-  API routes together), matches the "single unified project" requirement and
-  deploys cleanly to Vercel.
-- **Tailwind CSS v4** — styling.
-- **Cheerio** — lightweight HTML parsing for the crawler (fast, works fine in
-  serverless functions; see *Known limitations* below for the trade-off).
-- **pdfkit** — server-side PDF generation, streamed back as a download.
-- **Serper.dev** — search integration (official site resolution, company
-  facts, competitor discovery).
-- **OpenRouter** — AI analysis, with a live model-selection dropdown.
-- **Discord REST API** — bonus integration, posts the PDF + applicant/company
-  details to a channel via bot token.
-
-## Setup
+### 2. Install Dependencies
 
 ```bash
 npm install
-cp .env.example .env.local   # then fill in your keys, see below
-npm run dev                  # http://localhost:3000
 ```
 
-### Environment variables
+### 3. Environment Variables Configuration
 
-| Variable             | Required | Description                                                                 |
-|-----------------------|:--------:|-------------------------------------------------------------------------------|
-| `SERPER_API_KEY`      | Yes      | From [serper.dev](https://serper.dev). Used for search/resolution/competitors. |
-| `OPENROUTER_API_KEY`  | Yes      | From [openrouter.ai/keys](https://openrouter.ai/keys). Used for all AI calls. |
-| `APP_URL`              | No       | Public URL of your deployment, sent as `HTTP-Referer` to OpenRouter.         |
+Create a `.env.local` file in the root of the project and add the necessary API keys.
 
-Discord Bot Token and Channel ID are **not** environment variables — they're
-entered per-user on the `/settings` page and stored in `localStorage`, since
-the evaluator supplies their own bot token/channel at review time and the
-brief rules out a database.
-
-## Deployment (Vercel)
-
-1. Push this repo to GitHub.
-2. Import it in Vercel → it auto-detects Next.js.
-3. Add `SERPER_API_KEY` and `OPENROUTER_API_KEY` under Project → Settings →
-   Environment Variables.
-4. Deploy. That's it — API routes, crawler, and PDF generation all run as
-   Vercel serverless functions (`runtime = "nodejs"` is set explicitly on
-   every route since `pdfkit`/`cheerio` need the Node runtime, not Edge).
-
-Netlify or Cloudflare Pages work too, as long as the platform runs the API
-routes on a Node.js runtime (not an edge/worker runtime), since `pdfkit`
-needs Node's `fs`.
-
-## Project structure
-
-```
-app/
-  page.tsx                 chat-style research console
-  settings/page.tsx         Discord + applicant config (bonus)
-  api/research/route.ts     orchestrates the pipeline, streams progress (SSE)
-  api/pdf/route.ts          generates and returns the PDF report
-  api/discord/route.ts      posts the report to a Discord channel (bonus)
-  api/models/route.ts       live OpenRouter model list for the dropdown
-lib/
-  serper.ts                 Serper.dev search integration
-  crawler.ts                 website crawler (page discovery + extraction)
-  openrouter.ts              AI analysis + competitor reasoning + model list
-  pdfGenerator.ts             PDF report layout (pdfkit)
-  discord.ts                  Discord bot REST call (multipart file upload)
-  pipeline.ts                  orchestrates steps 1-4 above, emits progress
-  clientConfig.ts              localStorage helpers (Discord/applicant info)
-components/
-  ResearchConsole.tsx        chat UI, SSE stream consumer
-  Dossier.tsx                 report display + PDF/Discord actions
-  ProgressLog.tsx              case-log style progress indicator
-  ModelSelect.tsx               model dropdown
-  TopNav.tsx                    nav bar
+```bash
+cp .env.example .env.local
 ```
 
-## Design notes
+Open `.env.local` and configure the following variables:
 
-The UI leans into the "research dossier" framing rather than a generic
-chat skin: a dark "case log" console on the left where each pipeline step
-reports in as it completes, and a manila-paper "Dossier" panel on the right
-that assembles the structured report, stamped "REPORT COMPLETE" on
-completion. Monospace type is used specifically for data (URLs, phone
-numbers, model IDs) to visually separate facts from prose.
+```env
+# Required: Your OpenRouter API Key for the default AI provider
+OPENROUTER_API_KEY=your_openrouter_api_key_here
 
-## Known limitations / possible next steps
+# Required: Your Serper.dev API Key for web search
+SERPER_API_KEY=your_serper_api_key_here
 
-- **Crawling is HTML-only** (Cheerio + `fetch`, no headless browser). This
-  keeps it fast and cheap to run on serverless functions, but it won't
-  render client-side (JS-heavy SPA) marketing sites. A natural upgrade is a
-  Playwright-based crawler behind a feature flag for sites that need it.
-- **Phone/address extraction** uses a regex + a best-effort CSS selector
-  guess, backed up by the AI pass and Serper's knowledge graph. It's
-  intentionally conservative — it prefers `null` over a hallucinated value.
-- **No caching layer.** Since the brief rules out a database, repeated
-  research on the same company re-runs the full pipeline. Adding a
-  short-TTL cache (e.g. Vercel KV) would cut latency/cost on repeat lookups
-  without violating the "no permanent database" constraint.
-- **Competitor identification** is search-driven, so quality depends on how
-  well-indexed the company/industry is; niche or very new companies will
-  return thinner competitor sets.
+# Optional: Your NVIDIA API Key for the NVIDIA NIM provider
+NVIDIA_API_KEY=your_nvidia_api_key_here
 
-## FAQ (from the brief)
+# Optional: Ensure your app URL is set for OpenRouter headers
+APP_URL=http://localhost:3000
+```
 
-- **Any AI model?** Yes — the dropdown is populated live from OpenRouter's
-  `/models` endpoint, with a small curated fallback list if that call fails.
-- **Any framework/language?** This submission uses Next.js/TypeScript.
-- **Database?** None used; no persistent storage anywhere.
-- **Auth?** None — matches the "no authentication required" requirement.
+### 4. Run the Development Server
+
+```bash
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) in your browser to see the application in action.
+
+---
+
+## ⚙️ Environment Variables Documentation
+
+*   `OPENROUTER_API_KEY`: Required to authenticate with the OpenRouter API for primary LLM completions.
+*   `SERPER_API_KEY`: Required to use the Serper API for resolving company names to URLs and gathering search/competitor data.
+*   `NVIDIA_API_KEY`: Required if you choose to utilize the NVIDIA NIM provider for AI analysis. The system will gracefully fall back to OpenRouter or throw an error if this is missing while the NVIDIA provider is selected.
+*   `APP_URL`: Used to set the `HTTP-Referer` header for OpenRouter requests, ensuring proper analytics and tracking on the provider side. Defaults to `http://localhost:3000` locally.

@@ -1,17 +1,16 @@
-import { OPENROUTER_DEFAULT_MODELS, ProviderType } from "./types";
+import { OPENROUTER_DEFAULT_MODELS, AiProvider } from "./types";
 import OpenAI from "openai";
-
 
 interface ChatMessage {
   role: "system" | "user" | "assistant";
   content: string;
 }
 
-async function callAI(
+async function callAi(
+  provider: AiProvider,
   model: string,
   messages: ChatMessage[],
-  jsonMode = true,
-  provider: ProviderType = "openrouter"
+  jsonMode = true
 ): Promise<string> {
   let client: OpenAI;
   let modelId: string;
@@ -50,20 +49,19 @@ async function callAI(
 
   const completion = await client.chat.completions.create({
     model: modelId,
-    messages: messages,
+    messages: messages as OpenAI.Chat.ChatCompletionMessageParam[],
     temperature: 0.3,
     max_tokens: 4096,
-    ...(jsonMode && provider !== "nvidia" ? { response_format: { type: "json_object" } } : {}), // NVIDIA deepseek doesn't always support json_object cleanly, so removing it for now or keeping it based on model constraints. Wait, the prompt says "compatible with OpenAI SDK", let's include it conditionally or skip json_object.
+    ...(jsonMode && provider !== "nvidia" ? { response_format: { type: "json_object" } } : {}), // NVIDIA deepseek doesn't always support json_object cleanly
   });
 
   const content = completion.choices[0]?.message?.content;
-  if (!content) throw new Error("AI returned an empty response.");
+  if (!content) throw new Error(`${provider} returned an empty response.`);
   return content;
 }
 
 function safeJsonParse<T>(raw: string, fallback: T): T {
   try {
-    // Strip markdown code fences if the model added them despite instructions.
     const cleaned = raw.replace(/^```json\s*|```$/g, "").trim();
     return JSON.parse(cleaned) as T;
   } catch {
@@ -85,7 +83,7 @@ export async function analyzeCompany(
   crawledText: string,
   supportingFacts: string,
   model: string,
-  provider: ProviderType = "openrouter"
+  provider: AiProvider = "openrouter"
 ): Promise<AiCompanyAnalysis> {
   const system = `You are a B2B research analyst. You read raw website text and public search
 snippets, then produce a strictly factual, structured company profile.
@@ -108,10 +106,10 @@ ${crawledText}
 === Supporting public search snippets ===
 ${supportingFacts}`;
 
-  const raw = await callAI(model, [
+  const raw = await callAi(provider, model, [
     { role: "system", content: system },
     { role: "user", content: user },
-  ], true, provider);
+  ], true);
 
   return safeJsonParse<AiCompanyAnalysis>(raw, {
     summary: "AI analysis unavailable for this company.",
@@ -135,7 +133,7 @@ export async function identifyCompetitors(
   country: string,
   searchSnippets: string,
   model: string,
-  provider: ProviderType = "openrouter"
+  provider: AiProvider = "openrouter"
 ): Promise<AiCompetitor[]> {
   const system = `You are a market research analyst. Given raw search snippets about a company's
 market, identify real, named competitor companies operating in the same country and industry
@@ -151,10 +149,10 @@ Country: ${country}
 === Raw search snippets ===
 ${searchSnippets}`;
 
-  const raw = await callAI(model, [
+  const raw = await callAi(provider, model, [
     { role: "system", content: system },
     { role: "user", content: user },
-  ], true, provider);
+  ], true);
 
   const parsed = safeJsonParse<{ competitors: AiCompetitor[] }>(raw, {
     competitors: [],
