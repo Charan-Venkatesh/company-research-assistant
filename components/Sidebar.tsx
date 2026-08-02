@@ -78,8 +78,9 @@ export default function Sidebar() {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-[10px] font-data uppercase tracking-widest text-muted mb-1.5">Bot Token</label>
+                <label htmlFor="botToken" className="block text-[10px] font-data uppercase tracking-widest text-muted mb-1.5">Bot Token</label>
                 <input
+                  id="botToken"
                   type="password"
                   value={botToken}
                   onChange={(e) => setBotToken(e.target.value)}
@@ -89,8 +90,9 @@ export default function Sidebar() {
               </div>
 
               <div>
-                <label className="block text-[10px] font-data uppercase tracking-widest text-muted mb-1.5">Channel ID</label>
+                <label htmlFor="channelId" className="block text-[10px] font-data uppercase tracking-widest text-muted mb-1.5">Channel ID</label>
                 <input
+                  id="channelId"
                   type="text"
                   value={channelId}
                   onChange={(e) => setChannelId(e.target.value)}
@@ -103,8 +105,9 @@ export default function Sidebar() {
             <div className="space-y-4 pt-2 border-t border-hairline">
               <label className="block text-[10px] font-data uppercase tracking-widest text-muted mb-[-4px]">Applicant Details</label>
               <div>
-                <label className="block text-xs text-muted mb-1">Full Name</label>
+                <label htmlFor="fullName" className="block text-xs text-muted mb-1">Full Name</label>
                 <input
+                  id="fullName"
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
@@ -114,8 +117,9 @@ export default function Sidebar() {
               </div>
 
               <div>
-                <label className="block text-xs text-muted mb-1">Email Address</label>
+                <label htmlFor="emailAddress" className="block text-xs text-muted mb-1">Email Address</label>
                 <input
+                  id="emailAddress"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
