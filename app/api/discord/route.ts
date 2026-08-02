@@ -37,13 +37,15 @@ export async function POST(req: NextRequest) {
     );
 
     if (!outcome.ok) {
-      return NextResponse.json({ error: outcome.error }, { status: 502 });
+      console.error("Discord API error:", outcome.error);
+      return NextResponse.json({ error: "Failed to send report to Discord." }, { status: 502 });
     }
 
     return NextResponse.json({ ok: true });
   } catch (err) {
+    console.error("Discord send failed with exception:", err);
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Discord send failed." },
+      { error: "Internal Server Error." },
       { status: 500 }
     );
   }
