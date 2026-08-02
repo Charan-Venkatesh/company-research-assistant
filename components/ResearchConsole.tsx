@@ -5,7 +5,7 @@ import { ArrowUp, FileSearch, Loader2 } from "lucide-react";
 import ModelSelect from "./ModelSelect";
 import ProgressLog, { type ProgressItem } from "./ProgressLog";
 import Dossier from "./Dossier";
-import type { ResearchResult } from "@/lib/types";
+import type { ResearchResult, AiProvider } from "@/lib/types";
 
 interface LogEntry {
   id: string;
@@ -22,6 +22,7 @@ function initialProgress(): ProgressItem[] {
 export default function ResearchConsole() {
   const [input, setInput] = useState("");
   const [model, setModel] = useState("openai/gpt-4o-mini");
+  const [provider, setProvider] = useState<AiProvider>("openrouter");
   const [entries, setEntries] = useState<LogEntry[]>([]);
   const [progress, setProgress] = useState<ProgressItem[]>([]);
   const [result, setResult] = useState<ResearchResult | null>(null);
@@ -50,7 +51,7 @@ export default function ResearchConsole() {
       const res = await fetch("/api/research", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ input: trimmed, model }),
+        body: JSON.stringify({ input: trimmed, model, provider }),
         signal: controller.signal,
       });
 
@@ -123,10 +124,45 @@ export default function ResearchConsole() {
       {/* Left: console */}
       <div className="flex flex-col gap-4">
         <div className="rounded-xl border border-hairline bg-panel-800/50 p-4">
+          <div className="mb-4 flex gap-4">
+            <label className="flex items-center gap-2 cursor-pointer font-data text-[12px] text-muted hover:text-ink-text">
+              <input
+                type="radio"
+                name="provider"
+                value="openrouter"
+                checked={provider === "openrouter"}
+                onChange={() => setProvider("openrouter")}
+                className="accent-signal"
+              />
+              OpenRouter
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer font-data text-[12px] text-muted hover:text-ink-text">
+              <input
+                type="radio"
+                name="provider"
+                value="nvidia"
+                checked={provider === "nvidia"}
+                onChange={() => setProvider("nvidia")}
+                className="accent-signal"
+              />
+              NVIDIA NIM
+            </label>
+          </div>
           <label className="mb-1.5 block font-data text-[10px] uppercase tracking-[0.18em] text-muted">
-            AI model (OpenRouter)
+            AI model ({provider === "nvidia" ? "NVIDIA" : "OpenRouter"})
           </label>
-          <ModelSelect value={model} onChange={setModel} disabled={loading} />
+          {provider === "nvidia" ? (
+             <select
+               value={model}
+               onChange={(e) => setModel(e.target.value)}
+               disabled={loading}
+               className="w-full rounded-md border border-hairline bg-panel-700 px-3 py-2 text-[13px] text-ink-text outline-none focus:border-signal disabled:opacity-50"
+             >
+               <option value="deepseek-ai/deepseek-v4-pro">deepseek-ai/deepseek-v4-pro</option>
+             </select>
+          ) : (
+            <ModelSelect value={model} onChange={setModel} disabled={loading} />
+          )}
         </div>
 
         <div className="flex-1 space-y-3 overflow-y-auto rounded-xl border border-hairline bg-panel-800/30 p-4 min-h-[220px] max-h-[420px] lg:max-h-none">

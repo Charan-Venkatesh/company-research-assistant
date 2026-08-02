@@ -14,12 +14,15 @@ export interface Competitor {
   reason: string;
 }
 
+export type AiProvider = "openrouter" | "nvidia";
+
 export interface ResearchResult {
   company: CompanyInfo;
   competitors: Competitor[];
   sourcesUsed: string[];
   crawledPages: string[];
   model: string;
+  provider: AiProvider;
   generatedAt: string;
 }
 
