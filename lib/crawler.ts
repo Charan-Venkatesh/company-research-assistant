@@ -196,11 +196,20 @@ export async function crawlWebsite(startUrl: string): Promise<CrawlResult> {
     .map(([url]) => url)
     .slice(0, MAX_PAGES - 1);
 
-  for (const url of sortedCandidates) {
-    if (visited.has(url)) continue;
+  // Fetch all candidate pages concurrently
+  const fetchPromises = sortedCandidates.map(async (url) => {
+    if (visited.has(url)) return null;
     visited.add(url);
     const html = await fetchHtml(url);
-    if (!html) continue;
+    return { url, html };
+  });
+
+  const results = await Promise.all(fetchPromises);
+
+  for (const result of results) {
+    if (!result || !result.html) continue;
+    const { url, html } = result;
+
     const $page = cheerio.load(html);
     if (!phone || !address) {
       const c = extractContactHints($page);
