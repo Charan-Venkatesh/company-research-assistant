@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { runResearchPipeline } from "@/lib/pipeline";
+import { ProviderType } from "@/lib/types";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -9,13 +10,15 @@ function sse(event: string, data: unknown): string {
 }
 
 export async function POST(req: NextRequest) {
-  const { input, model } = await req.json();
+  const { input, model, provider } = await req.json();
 
   if (!input || typeof input !== "string") {
     return new Response(JSON.stringify({ error: "Missing input" }), {
       status: 400,
     });
   }
+
+  const p: ProviderType = provider === "nvidia" ? "nvidia" : "openrouter";
 
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
@@ -30,7 +33,8 @@ export async function POST(req: NextRequest) {
           {
             onProgress: (step, status, detail) =>
               send("progress", { step, status, detail }),
-          }
+          },
+          p
         );
         send("result", result);
       } catch (err) {

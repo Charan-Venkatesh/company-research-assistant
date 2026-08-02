@@ -6,7 +6,7 @@ import {
 } from "./serper";
 import { crawlWebsite } from "./crawler";
 import { analyzeCompany, identifyCompetitors } from "./openrouter";
-import type { ResearchResult } from "./types";
+import type { ResearchResult, ProviderType } from "./types";
 
 const URL_PATTERN = /^https?:\/\//i;
 
@@ -32,7 +32,8 @@ export interface PipelineCallbacks {
 export async function runResearchPipeline(
   rawInput: string,
   model: string,
-  callbacks: PipelineCallbacks = {}
+  callbacks: PipelineCallbacks = {},
+  provider: ProviderType = "openrouter"
 ): Promise<ResearchResult> {
   const { onProgress } = callbacks;
   const emit = (
@@ -102,7 +103,8 @@ export async function runResearchPipeline(
     companyName,
     crawledText || "No crawlable content found on the website.",
     supportingFacts,
-    model
+    model,
+    provider
   );
   emit("analyze", "done");
 
@@ -127,7 +129,8 @@ export async function runResearchPipeline(
         analysis.industry,
         analysis.country,
         competitorSnippets,
-        model
+        model,
+        provider
       ).catch(() => [])
     : [];
   emit("competitors", "done", `${competitors.length} competitors found`);

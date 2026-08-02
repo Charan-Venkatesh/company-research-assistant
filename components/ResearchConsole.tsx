@@ -1,11 +1,11 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { ArrowUp, FileSearch, Loader2 } from "lucide-react";
+import { ArrowUp, FileSearch, Loader2, ChevronDown } from "lucide-react";
 import ModelSelect from "./ModelSelect";
 import ProgressLog, { type ProgressItem } from "./ProgressLog";
 import Dossier from "./Dossier";
-import type { ResearchResult } from "@/lib/types";
+import type { ResearchResult, ProviderType } from "@/lib/types";
 
 interface LogEntry {
   id: string;
@@ -21,6 +21,7 @@ function initialProgress(): ProgressItem[] {
 
 export default function ResearchConsole() {
   const [input, setInput] = useState("");
+  const [provider, setProvider] = useState<ProviderType>("openrouter");
   const [model, setModel] = useState("openai/gpt-4o-mini");
   const [entries, setEntries] = useState<LogEntry[]>([]);
   const [progress, setProgress] = useState<ProgressItem[]>([]);
@@ -50,7 +51,7 @@ export default function ResearchConsole() {
       const res = await fetch("/api/research", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ input: trimmed, model }),
+        body: JSON.stringify({ input: trimmed, model, provider }),
         signal: controller.signal,
       });
 
@@ -122,11 +123,35 @@ export default function ResearchConsole() {
     <div className="mx-auto grid w-full max-w-6xl flex-1 grid-cols-1 gap-6 px-4 py-6 sm:px-8 lg:grid-cols-[420px_1fr]">
       {/* Left: console */}
       <div className="flex flex-col gap-4">
-        <div className="rounded-xl border border-hairline bg-panel-800/50 p-4">
-          <label className="mb-1.5 block font-data text-[10px] uppercase tracking-[0.18em] text-muted">
-            AI model (OpenRouter)
-          </label>
-          <ModelSelect value={model} onChange={setModel} disabled={loading} />
+        <div className="flex flex-col gap-3 rounded-xl border border-hairline bg-panel-800/50 p-4">
+          <div>
+            <label className="mb-1.5 block font-data text-[10px] uppercase tracking-[0.18em] text-muted">
+              AI Provider
+            </label>
+            <div className="relative">
+              <select
+                value={provider}
+                disabled={loading}
+                onChange={(e) => setProvider(e.target.value as ProviderType)}
+                className="w-full appearance-none rounded-md border border-hairline bg-panel-700 py-2 pl-3 pr-8 font-data text-[12px] text-ink-text outline-none transition-colors focus:border-signal disabled:opacity-50"
+              >
+                <option value="openrouter">OpenRouter</option>
+                <option value="nvidia">NVIDIA NIM</option>
+              </select>
+              <ChevronDown
+                size={14}
+                className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-muted"
+              />
+            </div>
+          </div>
+          {provider === "openrouter" && (
+            <div>
+              <label className="mb-1.5 block font-data text-[10px] uppercase tracking-[0.18em] text-muted">
+                AI model (OpenRouter)
+              </label>
+              <ModelSelect value={model} onChange={setModel} disabled={loading} />
+            </div>
+          )}
         </div>
 
         <div className="flex-1 space-y-3 overflow-y-auto rounded-xl border border-hairline bg-panel-800/30 p-4 min-h-[220px] max-h-[420px] lg:max-h-none">

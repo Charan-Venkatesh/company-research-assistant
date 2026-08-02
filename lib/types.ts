@@ -1,3 +1,5 @@
+export type ProviderType = "openrouter" | "nvidia";
+
 export interface CompanyInfo {
   name: string;
   website: string;
