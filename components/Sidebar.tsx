@@ -35,11 +35,11 @@ export default function Sidebar() {
   }
 
   return (
-    <aside className="w-80 border-r border-hairline bg-ink-900 flex flex-col h-screen overflow-y-auto">
+    <aside className="w-80 border-r border-hairline bg-[#131518] flex flex-col h-screen overflow-y-auto">
       <div className="p-6 border-b border-hairline">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded bg-[#e0b466] flex items-center justify-center text-ink-950 font-bold">
-            <div className="w-3 h-3 rounded-full border-2 border-ink-950"></div>
+            O
           </div>
           <div>
             <h1 className="font-display text-white text-[15px] font-semibold">Research AI</h1>
@@ -84,7 +84,7 @@ export default function Sidebar() {
                   value={botToken}
                   onChange={(e) => setBotToken(e.target.value)}
                   placeholder="Bot token..."
-                  className="w-full bg-ink-950 border border-hairline rounded-md px-3 py-2 text-sm text-white placeholder-muted focus:outline-none focus:border-signal"
+                  className="w-full bg-[#0d0e10] border border-[#24272c] rounded-md px-3 py-2 text-sm text-white placeholder-muted focus:outline-none focus:border-signal"
                 />
               </div>
 
@@ -95,7 +95,7 @@ export default function Sidebar() {
                   value={channelId}
                   onChange={(e) => setChannelId(e.target.value)}
                   placeholder="000000000000000000"
-                  className="w-full bg-ink-950 border border-hairline rounded-md px-3 py-2 text-sm text-white placeholder-muted focus:outline-none focus:border-signal"
+                  className="w-full bg-[#0d0e10] border border-[#24272c] rounded-md px-3 py-2 text-sm text-white placeholder-muted focus:outline-none focus:border-signal"
                 />
               </div>
             </div>
@@ -109,7 +109,7 @@ export default function Sidebar() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Your full name"
-                  className="w-full bg-ink-950 border border-hairline rounded-md px-3 py-2 text-sm text-white placeholder-muted focus:outline-none focus:border-signal"
+                  className="w-full bg-[#0d0e10] border border-[#24272c] rounded-md px-3 py-2 text-sm text-white placeholder-muted focus:outline-none focus:border-signal"
                 />
               </div>
 
@@ -120,7 +120,7 @@ export default function Sidebar() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="email@example.com"
-                  className="w-full bg-ink-950 border border-hairline rounded-md px-3 py-2 text-sm text-white placeholder-muted focus:outline-none focus:border-signal"
+                  className="w-full bg-[#0d0e10] border border-[#24272c] rounded-md px-3 py-2 text-sm text-white placeholder-muted focus:outline-none focus:border-signal"
                 />
               </div>
             </div>

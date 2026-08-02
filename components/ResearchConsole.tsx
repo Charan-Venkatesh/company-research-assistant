@@ -124,7 +124,7 @@ export default function ResearchConsole() {
   return (
     <>
       {/* Header bar within main content */}
-      <header className="flex items-center justify-between px-6 py-4 border-b border-hairline/0">
+      <header className="flex items-center justify-between px-6 py-4 border-b border-hairline">
          <div className="flex items-center gap-3 text-sm">
             <span className="font-semibold text-white">Company Research</span>
             <span className="flex items-center gap-1.5 rounded-full border border-wire-teal/30 bg-wire-teal/10 px-2 py-0.5 text-[10px] uppercase tracking-widest text-wire-teal">
@@ -194,7 +194,7 @@ export default function ResearchConsole() {
             onKeyDown={handleKeyDown}
             disabled={loading}
             placeholder="Enter a company name (e.g. Stripe) or website URL (e.g. https://stripe.com)..."
-            className="w-full bg-panel-800 border border-hairline rounded-xl pl-5 pr-32 py-4 text-sm text-white placeholder-muted focus:outline-none focus:border-signal disabled:opacity-60 shadow-lg"
+            className="w-full bg-[#1b1e22] border border-hairline rounded-2xl pl-5 pr-32 py-4 text-sm text-white placeholder-muted focus:outline-none focus:border-signal disabled:opacity-60 shadow-lg"
           />
           <button
             onClick={() => runResearch()}
