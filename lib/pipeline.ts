@@ -108,9 +108,19 @@ export async function runResearchPipeline(
   );
   emit("analyze", "done");
 
-  const phone = crawl.phone ?? facts?.contact.knowledgeGraph?.attributes?.["Phone"] ?? null;
-  const address =
-    crawl.address ?? facts?.contact.knowledgeGraph?.attributes?.["Address"] ?? null;
+  let phone = crawl.phone;
+  let phoneSource = crawl.phoneSource ?? null;
+  if (!phone && facts?.contact.knowledgeGraph?.attributes?.["Phone"]) {
+    phone = facts.contact.knowledgeGraph.attributes["Phone"];
+    phoneSource = "knowledge_graph";
+  }
+
+  let address = crawl.address;
+  let addressSource = crawl.addressSource ?? null;
+  if (!address && facts?.contact.knowledgeGraph?.attributes?.["Address"]) {
+    address = facts.contact.knowledgeGraph.attributes["Address"];
+    addressSource = "knowledge_graph";
+  }
 
   // --- 4. Competitor analysis ---
   emit("competitors", "active");
@@ -147,6 +157,10 @@ export async function runResearchPipeline(
       productsServices: analysis.productsServices,
       summary: analysis.summary,
       painPoints: analysis.painPoints,
+      targetCustomers: analysis.targetCustomers,
+      confidenceScore: analysis.confidenceScore,
+      phoneSource,
+      addressSource,
     },
     competitors: competitors.map((c) => ({
       name: c.name,
@@ -158,5 +172,6 @@ export async function runResearchPipeline(
     model,
     provider,
     generatedAt: new Date().toISOString(),
+    crawlStats: crawl.stats,
   };
 }

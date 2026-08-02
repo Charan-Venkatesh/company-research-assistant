@@ -19,7 +19,8 @@ async function callAi(
   provider: AiProvider,
   model: string,
   messages: ChatMessage[],
-  jsonMode = true
+  jsonMode = true,
+  retries = 2
 ): Promise<string> {
   let apiUrl = OPENROUTER_URL;
   let apiKey = process.env.OPENROUTER_API_KEY;
@@ -64,21 +65,34 @@ async function callAi(
     delete payload.response_format;
   }
 
-  const res = await fetch(apiUrl, {
-    method: "POST",
-    headers,
-    body: JSON.stringify(payload),
-  });
 
-  if (!res.ok) {
-    const body = await res.text().catch(() => "");
-    throw new Error(`${provider} request failed (${res.status}): ${body}`);
+  let attempt = 0;
+  while (attempt <= retries) {
+    try {
+      const res = await fetch(apiUrl, {
+        method: "POST",
+        headers,
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const body = await res.text().catch(() => "");
+        throw new Error(`${provider} request failed (${res.status}): ${body}`);
+      }
+
+      const data = await res.json();
+      const content = data?.choices?.[0]?.message?.content;
+      if (!content) throw new Error(`${provider} returned an empty response.`);
+      return content;
+    } catch (error) {
+      if (attempt === retries) {
+        throw error;
+      }
+      attempt++;
+      await new Promise(resolve => setTimeout(resolve, 1000 * attempt)); // Exponential backoff
+    }
   }
-
-  const data = await res.json();
-  const content = data?.choices?.[0]?.message?.content;
-  if (!content) throw new Error(`${provider} returned an empty response.`);
-  return content;
+  throw new Error("callAi failed after retries");
 }
 
 function safeJsonParse<T>(raw: string, fallback: T): T {
@@ -96,6 +110,8 @@ export interface AiCompanyAnalysis {
   painPoints: string[];
   industry: string;
   country: string;
+  targetCustomers?: string[];
+  confidenceScore?: string;
 }
 
 /** Analyze crawled website content into a structured company profile. */
@@ -117,7 +133,9 @@ Respond ONLY with a JSON object matching this shape, no prose, no markdown fence
   "painPoints": string[] (3-6 plausible business/customer pain points this company's product addresses
      or that companies like it commonly face - inferred from their positioning, not invented facts),
   "industry": string (short label, e.g. "cloud payments infrastructure"),
-  "country": string (primary country of operation, best guess from content, or "unknown")
+  "country": string (primary country of operation, best guess from content, or "unknown"),
+  "targetCustomers": string[] (list of ideal or target customers for their products/services),
+  "confidenceScore": string ("High", "Medium", or "Low" representing your confidence in the provided profile based on the available data)
 }`;
 
   const user = `Company name: ${companyName}
@@ -139,6 +157,8 @@ ${supportingFacts}`;
     painPoints: [],
     industry: "unknown",
     country: "unknown",
+    targetCustomers: [],
+    confidenceScore: "Low",
   });
 }
 

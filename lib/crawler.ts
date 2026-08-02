@@ -124,6 +124,14 @@ export interface CrawlResult {
   pages: CrawledPage[];
   phone: string | null;
   address: string | null;
+  phoneSource: string | null;
+  addressSource: string | null;
+  stats: {
+    pagesCrawled: number;
+    pagesIgnored: number;
+    usefulPages: number;
+    wordsExtracted: number;
+  };
 }
 
 /**
@@ -134,7 +142,7 @@ export interface CrawlResult {
 export async function crawlWebsite(startUrl: string): Promise<CrawlResult> {
   const startNormalized = normalizeUrl(startUrl, startUrl);
   if (!startNormalized) {
-    return { pages: [], phone: null, address: null };
+    return { pages: [], phone: null, address: null, phoneSource: null, addressSource: null, stats: { pagesCrawled: 0, pagesIgnored: 0, usefulPages: 0, wordsExtracted: 0 } };
   }
   const baseHost = new URL(startNormalized).hostname.replace(/^www\./, "");
 
@@ -142,32 +150,38 @@ export async function crawlWebsite(startUrl: string): Promise<CrawlResult> {
   const pages: CrawledPage[] = [];
   let phone: string | null = null;
   let address: string | null = null;
+  let phoneSource: string | null = null;
+  let addressSource: string | null = null;
+  let pagesIgnored = 0;
+  let wordsExtracted = 0;
 
   // 1. Fetch homepage, discover candidate links
   const homeHtml = await fetchHtml(startNormalized);
   if (!homeHtml) {
-    return { pages: [], phone: null, address: null };
+    return { pages: [], phone: null, address: null, phoneSource: null, addressSource: null, stats: { pagesCrawled: 0, pagesIgnored: 0, usefulPages: 0, wordsExtracted: 0 } };
   }
 
   const $home = cheerio.load(homeHtml);
   const contact = extractContactHints($home);
   phone = contact.phone;
   address = contact.address;
+  if (phone) phoneSource = startNormalized;
+  if (address) addressSource = startNormalized;
 
   visited.add(startNormalized);
   pages.push({
     url: startNormalized,
     title: $home("title").text().trim() || "Home",
-    text: extractText($home),
+    text: (() => { const t = extractText($home); wordsExtracted += t.split(/\s+/).length; return t; })(),
   });
 
   const candidateLinks = new Map<string, number>();
   $home("a[href]").each((_, el) => {
     const href = $home(el).attr("href");
-    if (!href || isIgnorable(href)) return;
+    if (!href || isIgnorable(href)) { pagesIgnored++; return; }
     const normalized = normalizeUrl(startNormalized, href);
-    if (!normalized || visited.has(normalized) || isIgnorable(normalized))
-      return;
+    if (!normalized || visited.has(normalized)) return;
+    if (isIgnorable(normalized)) { pagesIgnored++; return; }
     const score = scoreLink(normalized, baseHost);
     if (score > 0) {
       candidateLinks.set(
@@ -190,16 +204,28 @@ export async function crawlWebsite(startUrl: string): Promise<CrawlResult> {
     const $page = cheerio.load(html);
     if (!phone || !address) {
       const c = extractContactHints($page);
-      phone = phone ?? c.phone;
-      address = address ?? c.address;
+      if (!phone && c.phone) { phone = c.phone; phoneSource = url; }
+      if (!address && c.address) { address = c.address; addressSource = url; }
     }
     pages.push({
       url,
       title: $page("title").text().trim() || url,
-      text: extractText($page),
+      text: (() => { const t = extractText($page); wordsExtracted += t.split(/\s+/).length; return t; })(),
     });
     if (pages.length >= MAX_PAGES) break;
   }
 
-  return { pages, phone, address };
+  return {
+    pages,
+    phone,
+    address,
+    phoneSource,
+    addressSource,
+    stats: {
+      pagesCrawled: pages.length,
+      pagesIgnored,
+      usefulPages: pages.length,
+      wordsExtracted
+    }
+  };
 }

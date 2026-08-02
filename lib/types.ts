@@ -6,6 +6,10 @@ export interface CompanyInfo {
   productsServices: string[];
   summary: string;
   painPoints: string[];
+  targetCustomers?: string[];
+  confidenceScore?: "High" | "Medium" | "Low" | string;
+  phoneSource?: string | null;
+  addressSource?: string | null;
 }
 
 export interface Competitor {
@@ -24,6 +28,7 @@ export interface ResearchResult {
   model: string;
   provider: AiProvider;
   generatedAt: string;
+  crawlStats?: CrawlStats;
 }
 
 export interface CrawledPage {
@@ -63,3 +68,10 @@ export const OPENROUTER_DEFAULT_MODELS = [
   "meta-llama/llama-3.3-70b-instruct",
   "deepseek/deepseek-chat",
 ] as const;
+
+export interface CrawlStats {
+  pagesCrawled: number;
+  pagesIgnored: number;
+  usefulPages: number;
+  wordsExtracted: number;
+}
