@@ -85,11 +85,25 @@ export default function Dossier({ result }: { result: ResearchResult }) {
         </a>
 
         <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1.5 font-data text-[12.5px] text-ink-950/70">
-          <span className="flex items-center gap-1.5">
-            <Phone size={12} /> {company.phone ?? "not available"}
+          <span className="flex flex-col gap-0.5" title={company.phoneSource ? `Source: ${company.phoneSource}` : undefined}>
+            <span className="flex items-center gap-1.5">
+              <Phone size={12} /> {company.phone ?? "not available"}
+            </span>
+            {company.phoneSource && (
+              <span className="text-[10px] text-ink-950/40 truncate max-w-[200px]">
+                {company.phoneSource === "knowledge_graph" ? "Source: Google Search" : `Source: ${new URL(company.phoneSource).pathname || "Website"}`}
+              </span>
+            )}
           </span>
-          <span className="flex items-center gap-1.5">
-            <MapPin size={12} /> {company.address ?? "not available"}
+          <span className="flex flex-col gap-0.5" title={company.addressSource ? `Source: ${company.addressSource}` : undefined}>
+            <span className="flex items-center gap-1.5">
+              <MapPin size={12} /> {company.address ?? "not available"}
+            </span>
+            {company.addressSource && (
+              <span className="text-[10px] text-ink-950/40 truncate max-w-[200px]">
+                {company.addressSource === "knowledge_graph" ? "Source: Google Search" : `Source: ${new URL(company.addressSource).pathname || "Website"}`}
+              </span>
+            )}
           </span>
         </div>
       </div>
@@ -144,6 +158,24 @@ export default function Dossier({ result }: { result: ResearchResult }) {
 
         <section>
           <h3 className="mb-2 font-data text-[10px] uppercase tracking-[0.18em] text-ink-950/50">
+            Target Customers
+          </h3>
+          {company.targetCustomers && company.targetCustomers.length ? (
+            <ul className="space-y-1.5">
+              {company.targetCustomers.map((p, i) => (
+                <li key={i} className="flex gap-2 text-[13.5px] leading-snug">
+                  <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-signal" />
+                  {p}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-[13px] text-ink-950/50">Not available.</p>
+          )}
+        </section>
+
+        <section>
+          <h3 className="mb-2 font-data text-[10px] uppercase tracking-[0.18em] text-ink-950/50">
             Competitors ({competitors.length})
           </h3>
           {competitors.length ? (
@@ -174,6 +206,52 @@ export default function Dossier({ result }: { result: ResearchResult }) {
             </p>
           )}
         </section>
+
+
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 border-t border-paper-dim pt-6">
+          <section>
+            <h3 className="mb-2 font-data text-[10px] uppercase tracking-[0.18em] text-ink-950/50">
+              AI Confidence
+            </h3>
+            <p className="text-[13px] font-medium text-ink-950/90">
+              {company.confidenceScore || "Unknown"}
+            </p>
+          </section>
+
+          {result.crawlStats && (
+            <section>
+              <h3 className="mb-2 font-data text-[10px] uppercase tracking-[0.18em] text-ink-950/50">
+                Crawl Statistics
+              </h3>
+              <div className="text-[12px] text-ink-950/80 space-y-1">
+                <p>Pages Crawled: {result.crawlStats.pagesCrawled}</p>
+                <p>Pages Ignored: {result.crawlStats.pagesIgnored}</p>
+                <p>Words Extracted: {result.crawlStats.wordsExtracted.toLocaleString()}</p>
+              </div>
+            </section>
+          )}
+
+          <section>
+            <h3 className="mb-2 font-data text-[10px] uppercase tracking-[0.18em] text-ink-950/50">
+              Sources
+            </h3>
+            <ul className="text-[11px] text-ink-950/70 space-y-1 truncate max-w-[250px]">
+              {result.crawledPages.slice(0, 3).map((url, i) => (
+                <li key={i}>
+                  <a href={url} target="_blank" rel="noreferrer" className="hover:underline text-signal">
+                    {new URL(url).pathname || "/"}
+                  </a>
+                </li>
+              ))}
+              {result.crawledPages.length > 3 && (
+                <li>+ {result.crawledPages.length - 3} more pages</li>
+              )}
+              {result.sourcesUsed.map((s, i) => (
+                <li key={`src-${i}`}>{s.replace('serper:', 'Serper: ').replace('_', ' ')}</li>
+              ))}
+            </ul>
+          </section>
+        </div>
 
         <div className="flex flex-wrap items-center gap-2.5 border-t border-paper-dim pt-4">
           <button
