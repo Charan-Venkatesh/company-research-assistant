@@ -71,12 +71,12 @@ const BLOCKED_DOMAINS = [
   "reddit.com",
 ];
 
+const HOSTNAME_REGEX = /^https?:\/\/(?:www\.)?([^\/?:#]+)/i;
+
 function hostnameOf(url: string): string {
-  try {
-    return new URL(url).hostname.replace(/^www\./, "");
-  } catch {
-    return "";
-  }
+  if (typeof url !== 'string') return "";
+  const match = url.match(HOSTNAME_REGEX);
+  return match ? match[1].toLowerCase() : "";
 }
 
 /** Resolve a plain company name to its most likely official website. */
