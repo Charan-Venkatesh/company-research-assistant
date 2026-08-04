@@ -1,0 +1,3 @@
+## 2024-03-21 - Explicit Form Associations in Sidebar
+**Learning:** Adding `htmlFor` to `<label>` tags and matching `id` attributes to `<input>` elements improves accessibility and interaction. Users can click the label to focus the corresponding input. Additionally, text meant for grouping (like "Applicant Details") should be changed from `<label>` to `<div>` or an appropriate heading element since it doesn't correspond to a specific form control.
+**Action:** Always ensure that form inputs have explicitly associated labels and that `<label>` tags are only used for text that corresponds to an interactive form element.
